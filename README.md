@@ -1,8 +1,12 @@
 # youtube-downloader
-My code for a nice yotube downloader. 
+Project for practicing with customtkinter and pytube module 
 
-This is one of my practice codes for getting used to GUIs and different modules. 
+These 3 scripts make for a local youtube video/audio installer 
 
-In case you're done with slow online youtube video downloaders you can use my code to make you own program.
+YTDW: code for executing the program and converting youtube links to files 
+      
+      pulls GUI from YTDWGUI module and logging functions from YTDWlog
+      
+YTDWGUI: creates GUI using customtkinter and pushes widgets to main script
 
-You'll need to pipinstall pytube and customtkinter libraries for this to work 
+YTDWlog: uses logger module to log program uses 
