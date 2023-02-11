@@ -1,81 +1,78 @@
 #!/usr/bin/env python3
 
-#imports
-
 from pytube import YouTube
 import tkinter as tk 
-import customtkinter as ctk
 from winreg import *
+import shutil
+import YTDWGUI
+import YTDWlog
 
-#define parent window
-#and make input a string 
 
-root = ctk.CTk()
-root.title("Youtube Downloader")
-root.geometry("400x200")
-link_var = ctk.StringVar()
+#fix if title has dot at the end for audio
 
-#find univ downloads path
 
-with OpenKey(HKEY_CURRENT_USER, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders') as key:
+main = YTDWGUI.Main()
+main.main_menu_place()
+
+
+with OpenKey(HKEY_CURRENT_USER, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders') as key:     #find user download path 
     Downloads = QueryValueEx(key, '{374DE290-123F-4565-9164-39C4925E467B}')[0]
 
-#define video download function for button
+def execute_video():
+    yt = YouTube(formated_link())  #define pytube instance
+    main.video_title.configure(text = yt.title)
+    main.place_download_widgets()
+    yd = yt.streams.get_highest_resolution()
+    if yd.filesize_gb > 5:
+        warn_window = YTDWGUI.window()
+        warn_window.continue_button.configure(command = lambda:execute_video_download())
+        warn_window.place_widgets()
 
-def execute():
-    link_unformated = link_var.get()  #get unformated link without quotes
-    link_formated = '"' + link_unformated + '"'   #add quotes
-    yt = YouTube(link_formated)  #define pytube instance
+        YTDWlog.size_warning_logger(yt.title, "mp4", yd.filesize_gb)
+    else:
+        execute_video_download()
+        print(yd.default_filename)
 
-    video_title = ctk.CTkLabel(master = root,
-                               text = yt.title,
-                               width = 120,
-                               height = 25,
-                               corner_radius = 8)
-    video_title.place(relx = 0.5, rely = 0.75, anchor = tk.S) #show label with video title for confirmation
-
-
+def execute_video_download():
+    yt = YouTube(formated_link())  #define pytube instance
+    main.video_title.configure(text = yt.title)
+    main.place_download_widgets()
     yd = yt.streams.get_highest_resolution()
     yd.download(Downloads)  #download yt video at highest resolution
 
+    YTDWlog.info_logger(yt.title, "mp4", yd.filesize_gb)
+
+def execute_audio():
+    yt = YouTube(formated_link())
+    main.video_title.configure(text = yt.title)
+    main.place_download_widgets()
+    yd = yt.streams.filter(only_audio= True).all() #get only audio for all instances
+    
+    if yd[0].filesize_gb > 5:
+        warn_window = YTDWGUI.window()
+        warn_window.continue_button.configure(command = lambda:execute_audio_download())
+        warn_window.place_widgets()
+
+        YTDWlog.size_warning_logger(yt.title, "mp3", yd[0].filesize_gb)
+    else:
+        execute_audio_download()
+
+def execute_audio_download():
+    yt = YouTube(formated_link())
+    main.video_title.configure(text = yt.title)
+    main.place_download_widgets()
+    yd = yt.streams.filter(only_audio= True).all()  #get only audio for all instances
+    yd[0].download(Downloads)
+    shutil.move(Downloads + '\\' + yt.title +'.mp4', Downloads + '\\' + yt.title +'.mp3')  #rename file to convert to mp3 
+    
+    YTDWlog.info_logger(yt.title, "mp3", yd[0].filesize_gb)
+
+def formated_link():
+    return '"' + main.link_var.get() + '"'
+
+main.video_btn.configure(command = lambda: execute_video())
+main.audio_btn.configure(command = lambda: execute_audio())
 
 
-#make gui
-
-ct_coordx = 0.5 #center coordinate for ctkinter instances
-title_label = ctk.CTkLabel(master = root,
-                               text = "YouTube Video Downloader",
-                               width = 120,
-                               height = 25,
-                               text_color = ("red"),
-                               font = ("Roboto", 25, "bold"),
-                               corner_radius = 8)
-title_label.place(relx = ct_coordx, rely = 0, anchor = tk.N)  #program title label
-
-yt_label = ctk.CTkLabel(master = root,
-                               text = "Youtube Link:",
-                               width = 120,
-                               height = 25,
-                               fg_color = ("red"),
-                               font = ("Roboto", 15),
-                               corner_radius = 8)
-yt_label.place(relx = ct_coordx, rely = 0.3, anchor = tk.N)  #entry title label
-
-ent = ctk.CTkEntry(master = root,
-                               textvariable = link_var,  
-                               width = 270,
-                               height = 25,
-                               border_width = 2,
-                               corner_radius = 8)
-ent.place(relx = ct_coordx, rely = 0.45, anchor = tk.N )  #entry bar
-
-apply_btn = ctk.CTkButton(master=root,
-                                 width = 60,
-                                 height = 42,
-                                 border_width = 2,
-                                 corner_radius = 8,
-                                 text = "Apply",
-                                 command = execute)
-apply_btn.place(relx = 0.5, rely = 1, anchor = tk.S)   #enter button
-
-root.mainloop()
+if __name__ == "__main__":
+    main.mainloop()
