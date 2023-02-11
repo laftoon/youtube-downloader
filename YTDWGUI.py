@@ -5,12 +5,7 @@ import customtkinter as ctk
 
 
 
-def combine_funcs(*funcs):
-    def inner_combined_func(*args, **kwargs):
-        for f in funcs:
-            f(*args, **kwargs)
-    return inner_combined_func
-
+#main window customtkinter class
 class Main(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -59,7 +54,7 @@ class Main(ctk.CTk):
                                height = 22,
                                corner_radius = 8)
     def main_menu_place(self):
-        self.title_label.place(relx = 0.5, rely = 0.1, anchor = tk.N)  #program title label
+        self.title_label.place(relx = 0.5, rely = 0.1, anchor = tk.N)  #program title label   
         self.yt_label.place(relx = 0.5, rely = 0.3, anchor = tk.N)  #entry title label
         self.ent.place(relx = 0.5, rely = 0.45, anchor = tk.N )  #entry bar
         self.video_btn.place(relx = 0.6, rely = 0.95, anchor = tk.S)   #video button
@@ -69,7 +64,7 @@ class Main(ctk.CTk):
         self.video_title.place(relx = 0.5, rely = 0.72, anchor = tk.S)
 
 
-class window(ctk.CTkToplevel):
+class window(ctk.CTkToplevel):     #warning window class
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("300x100")

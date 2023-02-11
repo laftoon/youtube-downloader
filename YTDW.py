@@ -11,24 +11,23 @@ import YTDWlog
 #fix if title has dot at the end for audio
 
 
-main = YTDWGUI.Main()
+main = YTDWGUI.Main()    #pull GUI from module and create a class instance
 main.main_menu_place()
-
 
 with OpenKey(HKEY_CURRENT_USER, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders') as key:     #find user download path 
     Downloads = QueryValueEx(key, '{374DE290-123F-4565-9164-39C4925E467B}')[0]
 
-def execute_video():
+def execute_video():     #intermediate function to push to actual download 
     yt = YouTube(formated_link())  #define pytube instance
-    main.video_title.configure(text = yt.title)
+    main.video_title.configure(text = yt.title)      #show details of URL in GUI
     main.place_download_widgets()
     yd = yt.streams.get_highest_resolution()
     if yd.filesize_gb > 5:
-        warn_window = YTDWGUI.window()
+        warn_window = YTDWGUI.window()   #create warning if file is very big
         warn_window.continue_button.configure(command = lambda:execute_video_download())
         warn_window.place_widgets()
 
-        YTDWlog.size_warning_logger(yt.title, "mp4", yd.filesize_gb)
+        YTDWlog.size_warning_logger(yt.title, "mp4", yd.filesize_gb)   #log warning 
     else:
         execute_video_download()
         print(yd.default_filename)
@@ -38,9 +37,9 @@ def execute_video_download():
     main.video_title.configure(text = yt.title)
     main.place_download_widgets()
     yd = yt.streams.get_highest_resolution()
-    yd.download(Downloads)  #download yt video at highest resolution
+    yd.download(Downloads)  
 
-    YTDWlog.info_logger(yt.title, "mp4", yd.filesize_gb)
+    YTDWlog.info_logger(yt.title, "mp4", yd.filesize_gb)   #log downloa 
 
 def execute_audio():
     yt = YouTube(formated_link())
@@ -68,11 +67,11 @@ def execute_audio_download():
     YTDWlog.info_logger(yt.title, "mp3", yd[0].filesize_gb)
 
 def formated_link():
-    return '"' + main.link_var.get() + '"'
+    return '"' + main.link_var.get() + '"'    #format link to work with pytube as it only works in quotes
 
 main.video_btn.configure(command = lambda: execute_video())
 main.audio_btn.configure(command = lambda: execute_audio())
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    #run GUI
     main.mainloop()
